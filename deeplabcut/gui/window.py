@@ -481,7 +481,6 @@ class MainWindow(QMainWindow):
     def add_tabs(self):
         self.tab_widget = QtWidgets.QTabWidget()
         self.tab_widget.setContentsMargins(0, 20, 0, 0)
-        self.tab_widget.setTabsClosable(True)
         self.manage_project = ManageProject(
             root=self, parent=None, h1_description="DeepLabCut - Manage Project"
         )
@@ -556,7 +555,6 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.tab_widget)
         self.tab_widget.currentChanged.connect(self.refresh_active_tab)
-        self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
 
     def refresh_active_tab(self):
         active_tab = self.tab_widget.currentWidget()
