@@ -434,12 +434,22 @@ class MainWindow(QMainWindow):
 
     def _goto_superanimal(self):
         self.tab_widget = QtWidgets.QTabWidget()
+        self.tab_widget.setTabsClosable(True)
         self.tab_widget.setContentsMargins(0, 20, 0, 0)
         self.modelzoo = ModelZoo(
             root=self, parent=None, h1_description="DeepLabCut - Model Zoo"
         )
         self.tab_widget.addTab(self.modelzoo, "Model Zoo")
         self.setCentralWidget(self.tab_widget)
+        self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
+    
+    def _close_tab_event(self, index):
+        widget = self.tab_widget.widget(index)
+        self.tab_widget.removeTab(index)
+        widget.deleteLater()
+        if self.tab_widget.count() == 0:
+            self.tab_widget.deleteLater()
+            self._generate_welcome_page()
 
     def load_config(self, config):
         self.config = config
@@ -471,6 +481,7 @@ class MainWindow(QMainWindow):
     def add_tabs(self):
         self.tab_widget = QtWidgets.QTabWidget()
         self.tab_widget.setContentsMargins(0, 20, 0, 0)
+        self.tab_widget.setTabsClosable(True)
         self.manage_project = ManageProject(
             root=self, parent=None, h1_description="DeepLabCut - Manage Project"
         )
@@ -545,6 +556,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.tab_widget)
         self.tab_widget.currentChanged.connect(self.refresh_active_tab)
+        self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
 
     def refresh_active_tab(self):
         active_tab = self.tab_widget.currentWidget()
