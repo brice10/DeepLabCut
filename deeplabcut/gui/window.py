@@ -291,10 +291,15 @@ class MainWindow(QMainWindow):
         self.run_superanimal_button = QtWidgets.QPushButton("Model Zoo")
         self.run_superanimal_button.setFixedWidth(200)
         self.run_superanimal_button.clicked.connect(self._goto_superanimal)
+        
+        self.run_horse_app_button = QtWidgets.QPushButton("Model Zoo: Horse App")
+        self.run_horse_app_button.setFixedWidth(200)
+        self.run_horse_app_button.clicked.connect(self._goto_superanimal)
 
         self.layout_buttons.addWidget(self.create_project_button)
         self.layout_buttons.addWidget(self.load_project_button)
         self.layout_buttons.addWidget(self.run_superanimal_button)
+        self.layout_buttons.addWidget(self.run_horse_app_button)
 
         self.layout.addLayout(self.layout_buttons)
 
