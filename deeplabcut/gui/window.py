@@ -231,7 +231,7 @@ class MainWindow(QMainWindow):
         self.logger.info(f"Videos selected to analyze:\n{self.files}")
 
     def window_set(self):
-        self.setWindowTitle("DeepLabCut")
+        self.setWindowTitle("Analyse et comparaison des performances des chevaux avec DeepLabCut")
 
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Window, QtGui.QColor("#ffffff"))
@@ -250,7 +250,7 @@ class MainWindow(QMainWindow):
         self.layout.setSpacing(30)
 
         title = components._create_label_widget(
-            f"Welcome to the DeepLabCut Project Manager GUI {VERSION}!",
+            f"Bienvenue sur le logiciel de labbeling des videos des chevaux. \nCe logiciel utilise DeepLabCut {VERSION}!",
             "font:bold; font-size:18px;",
             margins=(0, 30, 0, 0),
         )
@@ -263,14 +263,14 @@ class MainWindow(QMainWindow):
         logo = os.path.join(BASE_DIR, "assets", "logo_transparent.png")
         pixmap = QtGui.QPixmap(logo)
         image_widget.setPixmap(
-            pixmap.scaledToHeight(400, QtCore.Qt.SmoothTransformation)
+            pixmap.scaledToHeight(300, QtCore.Qt.SmoothTransformation)
         )
         self.layout.addWidget(image_widget)
 
-        description = "DeepLabCut™ is an open source tool for markerless pose estimation of user-defined body parts with deep learning.\nA.  and M.W.  Mathis Labs | http://www.deeplabcut.org\n\n To get started,  create a new project, load an existing one, or try one of our pretrained models from the Model Zoo."
+        description = "Pour commencer, essayez le modèle préentrainné du Model Zoo pour l'analyse des chevaux."
         label = components._create_label_widget(
             description,
-            "font-size:12px; text-align: center;",
+            "font-size:14px; text-align: center;",
             margins=(0, 0, 0, 0),
         )
         label.setMinimumWidth(400)
@@ -280,25 +280,10 @@ class MainWindow(QMainWindow):
 
         self.layout_buttons = QtWidgets.QHBoxLayout()
         self.layout_buttons.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
-        self.create_project_button = QtWidgets.QPushButton("Create New Project")
-        self.create_project_button.setFixedWidth(200)
-        self.create_project_button.clicked.connect(self._create_project)
-
-        self.load_project_button = QtWidgets.QPushButton("Load Project")
-        self.load_project_button.setFixedWidth(200)
-        self.load_project_button.clicked.connect(self._open_project)
-
-        self.run_superanimal_button = QtWidgets.QPushButton("Model Zoo")
-        self.run_superanimal_button.setFixedWidth(200)
-        self.run_superanimal_button.clicked.connect(self._goto_superanimal)
         
-        self.run_horse_app_button = QtWidgets.QPushButton("Model Zoo: Horse App")
-        self.run_horse_app_button.setFixedWidth(200)
-        self.run_horse_app_button.clicked.connect(self._goto_superanimal)
+        self.run_horse_app_button = components._create_button_widget("Commencer maintenant")
+        self.run_horse_app_button.clicked.connect(self._goto_horse_analize_page)
 
-        self.layout_buttons.addWidget(self.create_project_button)
-        self.layout_buttons.addWidget(self.load_project_button)
-        self.layout_buttons.addWidget(self.run_superanimal_button)
         self.layout_buttons.addWidget(self.run_horse_app_button)
 
         self.layout.addLayout(self.layout_buttons)
@@ -445,6 +430,17 @@ class MainWindow(QMainWindow):
             root=self, parent=None, h1_description="DeepLabCut - Model Zoo"
         )
         self.tab_widget.addTab(self.modelzoo, "Model Zoo")
+        self.setCentralWidget(self.tab_widget)
+        self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
+        
+    def _goto_horse_analize_page(self):
+        self.tab_widget = QtWidgets.QTabWidget()
+        self.tab_widget.setTabsClosable(True)
+        self.tab_widget.setContentsMargins(0, 20, 0, 0)
+        self.horse_app = HorseApp(
+            root=self, parent=None, h1_description="DeepLabCut - Analyse des chevaux"
+        )
+        self.tab_widget.addTab(self.horse_app, "Commencer l'analyse")
         self.setCentralWidget(self.tab_widget)
         self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
     
@@ -601,8 +597,8 @@ class MainWindow(QMainWindow):
         print("Exiting...")
         answer = QtWidgets.QMessageBox.question(
             self,
-            "Quit",
-            "Are you sure you want to quit?",
+            "Quitter",
+            "Êtes-vous sûr de vouloir quitter ?",
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel,
             QtWidgets.QMessageBox.Cancel,
         )

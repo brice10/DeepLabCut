@@ -27,6 +27,21 @@ def _create_label_widget(
 
     return label
 
+def _create_button_widget(
+    text: str,
+    fontsize = 10,
+    height = 43,
+    width = 200
+) -> QtWidgets.QPushButton:
+    button = QtWidgets.QPushButton(text)
+    font = button.font()
+    font.setPointSize(fontsize)
+    button.setFont(font)
+    button.setFixedWidth(width)
+    button.setFixedHeight(height)
+
+    return button
+
 
 def _create_horizontal_layout(
     alignment=None, spacing: int = 20, margins: tuple = (20, 0, 0, 0)
@@ -169,6 +184,31 @@ class VideoSelectionWidget(QtWidgets.QWidget):
     def clear_selected_videos(self):
         self.root.video_files = set()
         self.root.logger.info(f"Cleared selected videos")
+
+class VideoCreationWidget(QtWidgets.QWidget):
+    def __init__(self, root: QtWidgets.QMainWindow, parent: QtWidgets.QWidget):
+        super(VideoCreationWidget, self).__init__(parent)
+
+        self.root = root
+        self.parent = parent
+
+        self._init_layout()
+
+    def _init_layout(self):
+        layout = _create_horizontal_layout()
+
+        # Create video modal
+        self.create_video_button = _create_button_widget("Ajouter un cheval", height=25, width=140)
+        self.create_video_button.clicked.connect(self.open_create_video_modal)
+
+        layout.addWidget(self.create_video_button)
+
+        self.setLayout(layout)
+
+    def open_create_video_modal(self):
+        print('Formulaire de création des chevaux')
+        self.parent.open_create_video_modal()
+
 
 
 class TrainingSetSpinBox(QtWidgets.QSpinBox):
