@@ -281,9 +281,13 @@ class MainWindow(QMainWindow):
         self.layout_buttons = QtWidgets.QHBoxLayout()
         self.layout_buttons.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         
-        self.run_horse_app_button = components._create_button_widget("Commencer maintenant")
+        self.run_horse_app_button = components._create_button_widget("Commencer maintenant", height=25)
         self.run_horse_app_button.clicked.connect(self._goto_horse_analize_page)
+        
+        self.run_modelzoo_button = components._create_button_widget("ModelZoo", height=25)
+        self.run_modelzoo_button.clicked.connect(self._goto_superanimal)
 
+        self.layout_buttons.addWidget(self.run_modelzoo_button)
         self.layout_buttons.addWidget(self.run_horse_app_button)
 
         self.layout.addLayout(self.layout_buttons)

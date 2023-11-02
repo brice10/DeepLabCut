@@ -10,26 +10,14 @@
 #
 import deeplabcut
 from PySide6 import QtWidgets
-from PySide6.QtCore import Qt, Signal, QTimer, QRegularExpression
-from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtCore import Qt, QRegularExpression
 from deeplabcut.gui.components import (
     DefaultTab,
     VideoCreationWidget,
     _create_label_widget,
-    _create_grid_layout,
 )
 from deeplabcut.gui.tabs import HorseProjectCreator
 from deeplabcut.modelzoo.utils import parse_available_supermodels
-
-
-class RegExpValidator(QRegularExpressionValidator):
-    validationChanged = Signal(QRegularExpressionValidator.State)
-
-    def validate(self, input_, pos):
-        state, input_, pos = super().validate(input_, pos)
-        self.validationChanged.emit(state)
-        return state, input_, pos
-
 
 class HorseApp(DefaultTab):
     def __init__(self, root, parent, h1_description):
@@ -60,7 +48,7 @@ class HorseApp(DefaultTab):
         self.main_layout.addWidget(self.run_button, alignment=Qt.AlignRight)
         
     def open_create_video_modal(self):
-        dlg = HorseProjectCreator(self)
+        dlg = HorseProjectCreator(self.root, self)
         dlg.show()
 
     def run_video_adaptation(self):

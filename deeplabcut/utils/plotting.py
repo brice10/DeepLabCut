@@ -64,26 +64,26 @@ def PlottingResults(
         Dataframe = Dataframe.loc(axis=1)[:, individuals2plot]
     animal_bpts = Dataframe.columns.get_level_values("bodyparts")
     # Pose X vs pose Y
-    fig1 = plt.figure(figsize=(20, 12))
+    fig1 = plt.figure(figsize=(30, 12))
     ax1 = fig1.add_subplot(111)
     ax1.set_xlabel("X position in pixels")
     ax1.set_ylabel("Y position in pixels")
     ax1.invert_yaxis()
 
     # Poses vs time
-    fig2 = plt.figure(figsize=(20, 10))
+    fig2 = plt.figure(figsize=(30, 10))
     ax2 = fig2.add_subplot(111)
     ax2.set_xlabel("Frame Index")
     ax2.set_ylabel("X-(dashed) and Y- (solid) position in pixels")
 
     # Likelihoods
-    fig3 = plt.figure(figsize=(20, 10))
+    fig3 = plt.figure(figsize=(30, 10))
     ax3 = fig3.add_subplot(111)
     ax3.set_xlabel("Frame Index")
     ax3.set_ylabel("Likelihood (use to set pcutoff)")
 
     # Histograms
-    fig4 = plt.figure()
+    fig4 = plt.figure(figsize=(30, 10))
     ax4 = fig4.add_subplot(111)
     ax4.set_ylabel("Count")
     ax4.set_xlabel("DeltaX and DeltaY")

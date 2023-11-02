@@ -15,6 +15,12 @@ class DLCParams:
         "mp4",
         "mov",
     ]
+    
+    HORSETYPES = [
+        "Plat",
+        "Obstacle",
+        "Trot",
+    ]
 
     NNETS = [
         "dlcrnet_ms5",

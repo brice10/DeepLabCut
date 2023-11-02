@@ -9,6 +9,7 @@
 # Licensed under GNU Lesser General Public License v3.0
 #
 import os
+import ntpath
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
@@ -48,7 +49,8 @@ def _create_horizontal_layout(
 ) -> QtWidgets.QHBoxLayout():
     layout = QtWidgets.QHBoxLayout()
     layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-    layout.setSpacing(spacing)
+    if spacing != -1:
+        layout.setSpacing(spacing)
     layout.setContentsMargins(*margins)
 
     return layout
@@ -184,6 +186,83 @@ class VideoSelectionWidget(QtWidgets.QWidget):
     def clear_selected_videos(self):
         self.root.video_files = set()
         self.root.logger.info(f"Cleared selected videos")
+
+class SingleVideoSelectionWidget(QtWidgets.QWidget):
+    def __init__(self, root: QtWidgets.QMainWindow, parent: QtWidgets.QWidget):
+        super(SingleVideoSelectionWidget, self).__init__(parent)
+
+        self.root = root
+        self.parent = parent
+
+        self._init_layout()
+
+    def _init_layout(self):
+        layout = _create_horizontal_layout(margins=(0, 0, 0, 0), spacing=-1)
+
+        # Videotype selection
+        self.videotype_widget = QtWidgets.QComboBox()
+        self.videotype_widget.setMinimumWidth(100)
+        self.videotype_widget.addItems(DLCParams.VIDEOTYPES)
+        self.videotype_widget.setCurrentText(self.parent.video_type)
+        self.parent.video_type_.connect(self.videotype_widget.setCurrentText)
+        self.videotype_widget.currentTextChanged.connect(self.update_videotype)
+
+        # Select videos
+        self.select_video_button = QtWidgets.QPushButton("Sélectionner une vidéo")
+        self.select_video_button.setFixedWidth(155)
+        self.select_video_button.clicked.connect(self.select_video)
+        self.parent.video_file_.connect(self._update_video_selection)
+
+        # Number of selected videos text
+        self.selected_video_text = QtWidgets.QLabel(
+            ""
+        )  # updated when videos are selected
+
+        # Clear video selection
+        self.clear_videos = QtWidgets.QPushButton("Effacer la sélection")
+        self.clear_videos.setFixedWidth(155)
+        self.clear_videos.clicked.connect(self.clear_selected_video)
+
+        layout.addWidget(self.videotype_widget)
+        layout.addWidget(self.selected_video_text)
+        layout.addWidget(self.select_video_button, Qt.AlignRight)
+        layout.addWidget(self.clear_videos, Qt.AlignRight)
+
+        self.setLayout(layout)
+
+    @property
+    def file(self):
+        return self.root.video_file
+
+    def update_videotype(self, vtype):
+        self.clear_selected_video()
+        self.parent.video_type = vtype
+
+    def _update_video_selection(self, videopath):
+        if self.parent.video_file:
+            self.selected_video_text.setText(f"{ntpath.basename(self.parent.video_file)}")
+            self.select_video_button.setText("Changer la video")
+        else:
+            self.selected_video_text.setText("")
+            self.select_video_button.setText("Sélectionner une vidéo")
+
+    def select_video(self):
+        cwd = self.root.project_folder
+        filename = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Sélectionnez la vidéo à analyser",
+            cwd,
+            f"Videos ({' *.'.join(DLCParams.VIDEOTYPES)[1:]})",
+        )
+
+        if filename:
+            # Qt returns a tuple (list of files, filetype)
+            print(os.path.abspath(filename[0]))
+            self.parent.video_file = os.path.abspath(filename[0])
+
+    def clear_selected_video(self):
+        self.parent.video_file = ""
+        self.root.logger.info(f"Cleared selected video")
 
 class VideoCreationWidget(QtWidgets.QWidget):
     def __init__(self, root: QtWidgets.QMainWindow, parent: QtWidgets.QWidget):
