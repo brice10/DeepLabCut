@@ -16,7 +16,6 @@ from deeplabcut.modelzoo.api import superanimal_inference
 from deeplabcut.utils.plotting import _plot_trajectories
 from pathlib import Path
 
-
 class SpatiotemporalAdaptation:
     def __init__(
         self,

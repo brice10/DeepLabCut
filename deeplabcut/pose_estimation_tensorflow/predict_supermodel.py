@@ -100,7 +100,7 @@ def video_inference_superanimal(
             scale_list=scale_list,
         )
         if not video_adapt:
-            if dest_folder is None or not dest_folder[video]:
+            if dest_folder is None:
                 adapter.before_adapt_inference(make_video=True,
                                            pcutoff=pcutoff,
                                            plot_trajectories = plot_trajectories)
@@ -108,12 +108,12 @@ def video_inference_superanimal(
                 adapter.before_adapt_inference(make_video=True,
                                            pcutoff=pcutoff,
                                            plot_trajectories = plot_trajectories,
-                                           dest_folder=dest_folder[video])
+                                           dest_folder=dest_folder)
         else:
-            if dest_folder is None or not dest_folder[video]:
+            if dest_folder is None:
                 adapter.before_adapt_inference(make_video=False)
             else:
-                adapter.before_adapt_inference(make_video=False, dest_folder=dest_folder[video])
+                adapter.before_adapt_inference(make_video=False, dest_folder=dest_folder)
             adapter.adaptation_training(adapt_iterations = adapt_iterations,
                                         pseudo_threshold = pseudo_threshold,
                                         trim_ends = trim_ends)

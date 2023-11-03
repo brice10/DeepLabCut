@@ -19,7 +19,7 @@ from deeplabcut.gui.components import (
 from deeplabcut import auxiliaryfunctions_horse, auxiliaryfunctions_settings
 from deeplabcut.gui.tabs import HorseProjectCreator
 from deeplabcut.modelzoo.utils import parse_available_supermodels
-from functools import cached_property
+from deeplabcut.gui.widgets import TableWidget
 
 
 class HorseApp(DefaultTab):
@@ -32,6 +32,7 @@ class HorseApp(DefaultTab):
         self.config = None
         self.loaded = False
         self.recentfiles = []
+        self.horse_list_loaded = []
         self.load_settings()
         self._set_page()
 
@@ -53,32 +54,42 @@ class HorseApp(DefaultTab):
         self.video_creation_widget = VideoCreationWidget(self.root, self)
         self.main_layout.addWidget(self.video_creation_widget)
 
-        self.run_button = QtWidgets.QPushButton("Démarrer l'analyse")
-        self.run_button.clicked.connect(self.run_video_adaptation)
-        self.main_layout.addWidget(self.run_button, alignment=Qt.AlignRight)
-        
+        self.table_widget = TableWidget(self, self.table_headers, self.horse_list_loaded, self.table_header_configs, action_btn=True)
+        self.main_layout.addWidget(self.table_widget)
+
     def open_create_video_modal(self):
         dlg = HorseProjectCreator(self.root, self)
         dlg.show()
 
-    def run_video_adaptation(self):
-        videos = list(self.files)
+    def run_video_adaptation(self, video_path, video_type=".mp4", dest_folder=None):
+        videos = list(video_path)
         if not videos:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Critical)
-            msg.setText("You must select a video file")
+            msg.setText("Vous devez sélectionner une vidéo pour l'analyse")
             msg.setWindowTitle("Error")
             msg.setMinimumWidth(400)
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.exec_()
             return
 
-        supermodel_name = parse_available_supermodels().keys()[0] if parse_available_supermodels().keys()[0] else 'superanimal_quadruped'
+        available_supermodels = parse_available_supermodels()
+        available_supermodels_keys_list = list(available_supermodels.keys())
+        supermodel_name = available_supermodels_keys_list[0] if available_supermodels_keys_list[0] else 'superanimal_quadruped'
 
+        msg2 = QtWidgets.QMessageBox()
+        msg2.setIcon(QtWidgets.QMessageBox.Critical)
+        msg2.setText(f"supermodel_name: {supermodel_name}, video_path: { video_path }, video_type: { video_type }, dest_folder: { dest_folder }")
+        msg2.setWindowTitle("Error")
+        msg2.setMinimumWidth(400)
+        msg2.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg2.exec_()
         deeplabcut.video_inference_superanimal(
             videos,
             supermodel_name,
-            video_adapt=True
+            video_adapt=True,
+            videotype=video_type,
+            dest_folder=dest_folder
         )
     
     @property
@@ -88,6 +99,13 @@ class HorseApp(DefaultTab):
         except TypeError:
             cfg = {}
         return cfg
+    
+    def get_horse_line(self, config_file):
+        try:
+            line = auxiliaryfunctions_horse.read_config_horse(config_file)
+        except TypeError:
+            line = {}
+        return line
     
     @property
     def settings(self):
@@ -108,6 +126,7 @@ class HorseApp(DefaultTab):
         if loaded:
             self.add_recent_filename(self.config)
             auxiliaryfunctions_settings.save_settings(self.recentfiles)
+            self.table_widget.add_row(len(self.table_widget.table_data), self.get_horse_line(self.config))
             
     def add_recent_filename(self, filename):
         if filename in self.recentfiles:
@@ -115,9 +134,26 @@ class HorseApp(DefaultTab):
         self.recentfiles.append(filename)
         
     def load_settings(self):
-        print('Load settings...')
         filenames = self.settings["recent_files_paths"] or []
-        print(f'Load settings { filenames }')
         for filename in filenames:
             self.add_recent_filename(filename)
-        print(f"settings loaded : { self.recentfiles }")
+        self.horse_list_loaded = self.build_horse_list()
+        
+    def build_horse_list(self):
+        data = []
+        for config_file in self.recentfiles:
+            data.append(self.get_horse_line(config_file))
+        return data
+    
+    @property
+    def table_headers(self):
+        return auxiliaryfunctions_horse.create_headers()
+    
+    @property
+    def table_header_configs(self):
+        return auxiliaryfunctions_horse.create_header_configs()
+    
+    def action_button_clicked(self, row):
+        print(f"Analyse du cheval: { row['horse_name'] }")
+        self.run_video_adaptation(row['video_path'], row['video_type'], dest_folder=row['project_path'])
+    

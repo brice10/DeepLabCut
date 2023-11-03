@@ -27,6 +27,8 @@ from matplotlib.widgets import RectangleSelector, Button, LassoSelector
 from queue import Queue
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QCursor, QAction
+from PySide6.QtWidgets import QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QAbstractItemView
+from PySide6.QtCore import Qt
 from scipy.spatial import cKDTree as KDTree
 from skimage import io
 
@@ -684,3 +686,69 @@ class SkeletonBuilder(QtWidgets.QDialog):
             self.segs.add(tuple(map(tuple, self.xy[pair_sorted, :])))
         self.lines.set_segments(self.segs)
         self.fig.canvas.draw_idle()
+
+class TableWidget(QWidget):
+    def __init__(self, parent, labels, data, label_configs=None, action_btn=False, action_btn_text="Analyser"):
+        super().__init__()
+        self.parent = parent
+        # Création de la table
+        self.table = QTableWidget()
+        #self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.column_size = len(labels) if not action_btn else len(labels) + 1
+        self.table.setColumnCount(self.column_size)  # Nombre de colonnes
+        self.set_column_width(200)
+        if not action_btn:
+            self.table_labels = labels 
+        else:
+            labels.append(action_btn_text)
+            self.table_labels = labels
+        self.table.setHorizontalHeaderLabels(self.table_labels)
+        self.action_btn = action_btn
+        self.action_btn_text = action_btn_text
+        self.label_configs = label_configs
+        self.table_data = data
+        
+        # Ajout des lignes à la table
+        for i, info in enumerate(self.table_data):
+            self.add_row(i, info)
+
+        # Création de la mise en page
+        layout = QVBoxLayout()
+        layout.addWidget(self.table)
+        self.setLayout(layout)
+
+    def add_row(self, row, info):
+        self.table.insertRow(row)
+        # Ajout des informations dans chaque cellule de la rangée
+        for col, value in enumerate(info.values()):
+            item = QTableWidgetItem(str(value))
+            #item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.table.setItem(row, col, item)
+
+        if self.action_btn:
+            # Création du bouton d'action
+            action_button = QPushButton(self.action_btn_text)
+            action_button.clicked.connect(lambda: self.action_button_clicked(row))
+            # Ajout du bouton à la dernière colonne de la rangée
+            self.table.setCellWidget(row, len(self.table_labels) -1, action_button)
+
+    def action_button_clicked(self, row):
+        # Récupération des informations à partir de la rangée
+        info = {}
+        for col, header in enumerate(self.table_labels[0:len(self.table_labels) - 1]):
+            item = self.table.item(row, col)
+            if self.label_configs is not None:
+                info[self.label_configs[header]] = item.text()
+            else:
+                info[item.column()] = item.text()
+
+        # Appel de la fonction d'analyse avec les informations du cheval
+        self.parent.action_button_clicked(info)
+        
+    def set_column_width(self, width):
+        for col in range(self.table.columnCount()):
+            self.table.setColumnWidth(col, width)
+            
+    def set_table_height(self, height):
+        self.table.setFixedHeight(height)

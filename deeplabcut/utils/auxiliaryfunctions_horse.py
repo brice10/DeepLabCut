@@ -93,3 +93,20 @@ def write_config_horse(configname, cfg):
             
         ruamelFile.dump(cfg_file, cf)
 
+def create_header_configs():
+    return {
+        "Nom": "horse_name",
+        "Père": "horse_father",
+        "Mère": "horse_mother",
+        "Propriétaire": "horse_owner",
+        "Vendeur": "horse_seller",
+        "Acheteur": "horse_buyer",
+        "Type de Parcours": "horse_type",
+        "Date": "date",
+        "Emplacement": "project_path",
+        "Video": "video_path",
+        "Type de video": "video_type"
+    }
+    
+def create_headers():
+    return ["Nom", "Père", "Mère", "Propriétaire", "Vendeur", "Acheteur", "Type de Parcours", "Date", "Emplacement", "Video", "Type de video"]
