@@ -36,7 +36,7 @@ class HorseProjectCreator(QtWidgets.QDialog):
         self.parent = parent
         
         self.videotype = "mp4"
-        self.files = ""
+        self.file = ""
         
         self.setWindowTitle("Enregistrer un cheval")
         self.setModal(True)
@@ -131,19 +131,19 @@ class HorseProjectCreator(QtWidgets.QDialog):
     def lay_out_video_frame(self):
         video_frame = QtWidgets.QFrame(self)
 
-        self.horse_video_type_combo = QtWidgets.QComboBox(video_frame)
-        self.horse_video_type_combo.addItems(map(str, (DLCParams.HORSETYPES[0], DLCParams.HORSETYPES[1], DLCParams.HORSETYPES[2])))
-        self.horse_video_type_combo.currentTextChanged.connect(self.check_horse_video_type)
-        horse_video_type_label = QtWidgets.QLabel("Catégorie de parcour:", video_frame)
-        horse_video_type_label.setBuddy(self.horse_video_type_combo)
+        self.horse_type_combo = QtWidgets.QComboBox(video_frame)
+        self.horse_type_combo.addItems(map(str, (DLCParams.HORSETYPES[0], DLCParams.HORSETYPES[1], DLCParams.HORSETYPES[2])))
+        self.horse_type_combo.currentTextChanged.connect(self.check_horse_type)
+        horse_type_label = QtWidgets.QLabel("Catégorie de parcour:", video_frame)
+        horse_type_label.setBuddy(self.horse_type_combo)
 
         self.copy_box = QtWidgets.QCheckBox("Copier la vidéo dans le dossier des résultats d'analyse ?", video_frame)
         self.copy_box.setChecked(False)
 
         vbox = QtWidgets.QVBoxLayout(video_frame)
         layout1 = QtWidgets.QHBoxLayout()
-        layout1.addWidget(horse_video_type_label)
-        layout1.addWidget(self.horse_video_type_combo)
+        layout1.addWidget(horse_type_label)
+        layout1.addWidget(self.horse_type_combo)
         vbox.addLayout(layout1)
 
         self.video_selection_widget = SingleVideoSelectionWidget(self.root, self)
@@ -154,7 +154,7 @@ class HorseProjectCreator(QtWidgets.QDialog):
         return video_frame
 
     def finalize_project(self):
-        fields = [self.horse_name_line, self.owner_line]
+        fields = [self.horse_name_line, self.horse_owner_line, self.horse_father_line, self.horse_mother_line, self.horse_seller_line, self.horse_buyer_line]
         empty = [i for i, field in enumerate(fields) if not field.text()]
         for i, field in enumerate(fields):
             if i in empty:
@@ -164,35 +164,45 @@ class HorseProjectCreator(QtWidgets.QDialog):
         if empty:
             return
 
-        horse_video_type = self.horse_video_type_combo.currentText()
         try:
-            videos = list(self.video_frame.selected_items)
-            if not len(videos):
-                print("Add at least a video to the project.")
-                self.video_frame.fancy_list.setStyleSheet("border: 1px solid red")
+            video = self.video_file
+            if not video:
+                print("Vous devez sélectionner une vidéo pour l'analyse")
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Critical)
+                msg.setText("Vous devez sélectionner une vidéo pour l'analyse")
+                msg.setWindowTitle("Erreur")
+                msg.setMinimumWidth(400)
+                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                msg.exec_()
                 return
             else:
-                self.video_frame.fancy_list.setStyleSheet(
-                    self.video_frame.fancy_list._default_style
-                )
-                """ config = deeplabcut.create_new_project(
-                    self.proj_default,
-                    self.exp_default,
-                    videos,
+                to_copy = self.copy_box.isChecked()
+                horse_type = self.horse_type_combo.currentText()
+                
+                config = deeplabcut.create_new_project_horse(
+                    self.horse_name_default,
+                    self.horse_father_default,
+                    self.horse_mother_default,
+                    self.horse_owner_default,
+                    self.horse_seller_default,
+                    self.horse_buyer_default,
+                    horse_type,
+                    self.video_file,
                     self.loc_default,
                     to_copy,
-                    multianimal=is_madlc,
+                    videotype=self.videotype
                 )
                 self.parent.load_config(config)
                 self.parent._update_project_state(
                     config=config,
                     loaded=True,
-                ) """ 
+                )
         except FileExistsError:
             print('Project "{}" already exists!'.format(self.horse_name_default))
             return
 
-        msg = QtWidgets.QMessageBox(text=f"New project created")
+        msg = QtWidgets.QMessageBox(text=f"Nouveau cheval créé")
         msg.setIcon(QtWidgets.QMessageBox.Information)
         msg.exec_()
 
@@ -207,11 +217,11 @@ class HorseProjectCreator(QtWidgets.QDialog):
         self.loc_default = dirname
         self.update_project_location()
 
-    def check_horse_video_type(self, text):
-        self.horse_video_type = text
+    def check_horse_type(self, text):
+        self.horse_type = text.strip()
 
     def update_horse_name(self, text):
-        self.horse_name_default = text
+        self.horse_name_default = text.strip()
         self.update_project_location()
 
     def update_owner_name(self, text):
@@ -219,16 +229,16 @@ class HorseProjectCreator(QtWidgets.QDialog):
         self.update_project_location()
         
     def update_horse_father_name(self, text):
-        self.horse_father_default = text
+        self.horse_father_default = text.strip()
         
     def update_horse_mother_name(self, text):
-        self.horse_mother_default = text
+        self.horse_mother_default = text.strip()
         
     def update_horse_seller_name(self, text):
-        self.horse_seller_default = text
+        self.horse_seller_default = text.strip()
     
     def update_horse_buyer_name(self, text):
-        self.horse_buyer_default = text
+        self.horse_buyer_default = text.strip()
 
     def update_project_location(self):
         full_name = self.name_default.format(self.horse_name_default, self.horse_owner_default)

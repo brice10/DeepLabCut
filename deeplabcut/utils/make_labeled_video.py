@@ -665,11 +665,11 @@ def create_labeled_video(
 
     if get_start_method() == "fork":
         with Pool(min(os.cpu_count(), len(Videos))) as pool:
-            results = pool.map(func, Videos)
+            results = pool.map(func(destfolder=destfolder), Videos)
     else:
         results = []
         for video in Videos:
-            results.append(func(video))
+            results.append(func(video,destfolder=destfolder))
 
     os.chdir(start_path)
     return results

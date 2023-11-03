@@ -22,7 +22,8 @@ def video_inference_superanimal(
     pcutoff=0.1,
     adapt_iterations = 1000,
     pseudo_threshold = 0.1,
-    trim_ends = None
+    trim_ends = None,
+    dest_folder = None,
 ):
     """
     Makes prediction based on a super animal model. Note right now we only support single animal video inference
@@ -99,11 +100,20 @@ def video_inference_superanimal(
             scale_list=scale_list,
         )
         if not video_adapt:
-            adapter.before_adapt_inference(make_video=True,
+            if dest_folder is None or not dest_folder[video]:
+                adapter.before_adapt_inference(make_video=True,
                                            pcutoff=pcutoff,
                                            plot_trajectories = plot_trajectories)
+            else:
+                adapter.before_adapt_inference(make_video=True,
+                                           pcutoff=pcutoff,
+                                           plot_trajectories = plot_trajectories,
+                                           dest_folder=dest_folder[video])
         else:
-            adapter.before_adapt_inference(make_video=False)
+            if dest_folder is None or not dest_folder[video]:
+                adapter.before_adapt_inference(make_video=False)
+            else:
+                adapter.before_adapt_inference(make_video=False, dest_folder=dest_folder[video])
             adapter.adaptation_training(adapt_iterations = adapt_iterations,
                                         pseudo_threshold = pseudo_threshold,
                                         trim_ends = trim_ends)

@@ -16,3 +16,4 @@ from deeplabcut.create_project.modelzoo import (
 )
 from deeplabcut.create_project.new import create_new_project
 from deeplabcut.create_project.new_3d import create_new_project_3d
+from deeplabcut.create_project.new_horse import create_new_project_horse

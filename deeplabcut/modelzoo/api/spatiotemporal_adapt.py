@@ -99,7 +99,7 @@ class SpatiotemporalAdaptation:
         else:
             self.customized_pose_config = customized_pose_config
 
-    def before_adapt_inference(self, make_video=False, **kwargs):
+    def before_adapt_inference(self, make_video=False, dest_folder=None, **kwargs):
         if self.init_weights != "":
             print("using customized weights", self.init_weights)
             _, datafiles = superanimal_inference.video_inference(
@@ -109,6 +109,7 @@ class SpatiotemporalAdaptation:
                 scale_list=self.scale_list,
                 init_weights=self.init_weights,
                 customized_test_config=self.customized_pose_config,
+                destfolder=dest_folder
             )
         else:
             self.init_weights, datafiles = superanimal_inference.video_inference(
@@ -117,9 +118,10 @@ class SpatiotemporalAdaptation:
                 videotype=self.videotype,
                 scale_list=self.scale_list,
                 customized_test_config=self.customized_pose_config,
+                destfolder=dest_folder
             )
         if kwargs.pop("plot_trajectories", True):
-            _plot_trajectories(datafiles[0])
+            _plot_trajectories(datafiles[0], dest_folder=dest_folder)
 
         if make_video:
             deeplabcut.create_labeled_video(
@@ -130,6 +132,7 @@ class SpatiotemporalAdaptation:
                 init_weights=self.init_weights,
                 draw_skeleton=True,
                 superanimal_name=self.supermodel_name,
+                destfolder=dest_folder
                 **kwargs,
             )
 

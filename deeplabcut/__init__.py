@@ -36,6 +36,7 @@ except (ModuleNotFoundError, ImportError):
 
 from deeplabcut.create_project import (
     create_new_project,
+    create_new_project_horse,
     create_new_project_3d,
     add_new_videos,
     load_demo_data,
@@ -65,6 +66,8 @@ from deeplabcut.utils import (
     create_video_with_all_detections,
     plot_trajectories,
     auxiliaryfunctions,
+    auxiliaryfunctions_horse,
+    auxiliaryfunctions_settings,
     convert2_maDLC,
     convertcsv2h5,
     analyze_videos_converth5_to_csv,

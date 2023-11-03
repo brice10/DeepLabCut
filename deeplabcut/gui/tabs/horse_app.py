@@ -9,20 +9,30 @@
 # Licensed under GNU Lesser General Public License v3.0
 #
 import deeplabcut
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import Qt, QRegularExpression
 from deeplabcut.gui.components import (
     DefaultTab,
     VideoCreationWidget,
     _create_label_widget,
 )
+from deeplabcut import auxiliaryfunctions_horse, auxiliaryfunctions_settings
 from deeplabcut.gui.tabs import HorseProjectCreator
 from deeplabcut.modelzoo.utils import parse_available_supermodels
+from functools import cached_property
+
 
 class HorseApp(DefaultTab):
+    config_loaded = QtCore.Signal()
+    
     def __init__(self, root, parent, h1_description):
         super().__init__(root, parent, h1_description)
         self._val_pattern = QRegularExpression(r"(\d{3,5},\s*)+\d{3,5}")
+        self.root = root
+        self.config = None
+        self.loaded = False
+        self.recentfiles = []
+        self.load_settings()
         self._set_page()
 
     @property
@@ -70,3 +80,44 @@ class HorseApp(DefaultTab):
             supermodel_name,
             video_adapt=True
         )
+    
+    @property
+    def cfg(self):
+        try:
+            cfg = auxiliaryfunctions_horse.read_config_horse(self.config)
+        except TypeError:
+            cfg = {}
+        return cfg
+    
+    @property
+    def settings(self):
+        try:
+            settings = auxiliaryfunctions_settings.read_config_settings()
+        except TypeError:
+            settings = {}
+        return settings
+        
+    def load_config(self, config):
+        self.config = config
+        self.config_loaded.emit()
+        print(f'Horse "{self.cfg["horse_name"]}" successfully loaded.')
+
+    def _update_project_state(self, config, loaded):
+        self.config = config
+        self.loaded = loaded
+        if loaded:
+            self.add_recent_filename(self.config)
+            auxiliaryfunctions_settings.save_settings(self.recentfiles)
+            
+    def add_recent_filename(self, filename):
+        if filename in self.recentfiles:
+            return
+        self.recentfiles.append(filename)
+        
+    def load_settings(self):
+        print('Load settings...')
+        filenames = self.settings["recent_files_paths"] or []
+        print(f'Load settings { filenames }')
+        for filename in filenames:
+            self.add_recent_filename(filename)
+        print(f"settings loaded : { self.recentfiles }")
