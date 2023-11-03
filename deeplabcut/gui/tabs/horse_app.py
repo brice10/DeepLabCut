@@ -62,7 +62,7 @@ class HorseApp(DefaultTab):
         dlg.show()
 
     def run_video_adaptation(self, video_path, video_type=".mp4", dest_folder=None):
-        videos = list(video_path)
+        videos = [video_path]
         if not videos:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Critical)
@@ -77,13 +77,6 @@ class HorseApp(DefaultTab):
         available_supermodels_keys_list = list(available_supermodels.keys())
         supermodel_name = available_supermodels_keys_list[0] if available_supermodels_keys_list[0] else 'superanimal_quadruped'
 
-        msg2 = QtWidgets.QMessageBox()
-        msg2.setIcon(QtWidgets.QMessageBox.Critical)
-        msg2.setText(f"supermodel_name: {supermodel_name}, video_path: { video_path }, video_type: { video_type }, dest_folder: { dest_folder }")
-        msg2.setWindowTitle("Error")
-        msg2.setMinimumWidth(400)
-        msg2.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        msg2.exec_()
         deeplabcut.video_inference_superanimal(
             videos,
             supermodel_name,

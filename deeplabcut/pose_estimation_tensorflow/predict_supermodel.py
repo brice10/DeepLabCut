@@ -98,6 +98,7 @@ def video_inference_superanimal(
             modelfolder=modelfolder,
             videotype=videotype,
             scale_list=scale_list,
+            dest_folder=dest_folder
         )
         if not video_adapt:
             if dest_folder is None:

@@ -27,6 +27,7 @@ class SpatiotemporalAdaptation:
         modelfolder="",
         customized_pose_config="",
         init_weights="",
+        dest_folder=None
     ):
         """
         This class supports video adaptation to a super model.
@@ -82,6 +83,7 @@ class SpatiotemporalAdaptation:
         self.scale_list = scale_list
         self.videotype = videotype
         vname = str(Path(self.video_path).stem)
+        self.dest_folder = dest_folder
         self.adapt_modelprefix = vname + "_video_adaptation"
         self.adapt_iterations = adapt_iterations
         self.modelfolder = modelfolder
@@ -164,7 +166,10 @@ class SpatiotemporalAdaptation:
         # looking for the pseudo label path
         DLCscorer = "DLC_" + Path(self.init_weights).stem
         vname = str(Path(self.video_path).stem)
-        video_root = Path(self.video_path).parent
+        if (self.dest_folder):
+            video_root = self.dest_folder
+        else:
+            video_root = Path(self.video_path).parent
 
         _, pseudo_label_path, _, _ = deeplabcut.auxiliaryfunctions.load_analyzed_data(
             video_root, vname, DLCscorer, False, ""
