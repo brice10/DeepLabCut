@@ -688,24 +688,26 @@ class SkeletonBuilder(QtWidgets.QDialog):
         self.fig.canvas.draw_idle()
 
 class TableWidget(QWidget):
-    def __init__(self, parent, labels, data, label_configs=None, action_btn=False, action_btn_text="Analyser"):
+    def __init__(self, parent, labels, data, label_configs=None, action_btn=False, action_btn_text="Analyser", snd_action_btn_text="Résultats de l'analyse"):
         super().__init__()
         self.parent = parent
         # Création de la table
         self.table = QTableWidget()
         #self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.column_size = len(labels) if not action_btn else len(labels) + 1
+        self.column_size = len(labels) if not action_btn else len(labels) + 2
         self.table.setColumnCount(self.column_size)  # Nombre de colonnes
         self.set_column_width(200)
         if not action_btn:
             self.table_labels = labels 
         else:
             labels.append(action_btn_text)
+            labels.append(snd_action_btn_text)
             self.table_labels = labels
         self.table.setHorizontalHeaderLabels(self.table_labels)
         self.action_btn = action_btn
         self.action_btn_text = action_btn_text
+        self.snd_action_btn_text = snd_action_btn_text
         self.label_configs = label_configs
         self.table_data = data
         
@@ -727,16 +729,20 @@ class TableWidget(QWidget):
             self.table.setItem(row, col, item)
 
         if self.action_btn:
-            # Création du bouton d'action
+            # Création des boutons d'action
             action_button = QPushButton(self.action_btn_text)
-            action_button.clicked.connect(lambda: self.action_button_clicked(row))
+            action_button.clicked.connect(lambda: self.action_button_clicked(row, 1))
             # Ajout du bouton à la dernière colonne de la rangée
-            self.table.setCellWidget(row, len(self.table_labels) -1, action_button)
+            self.table.setCellWidget(row, len(self.table_labels) - 2, action_button)
+            action_button = QPushButton(self.snd_action_btn_text)
+            action_button.clicked.connect(lambda: self.action_button_clicked(row, 2))
+            # Ajout du bouton à la dernière colonne de la rangée
+            self.table.setCellWidget(row, len(self.table_labels) - 1, action_button)
 
-    def action_button_clicked(self, row):
+    def action_button_clicked(self, row, flag=1):
         # Récupération des informations à partir de la rangée
         info = {}
-        for col, header in enumerate(self.table_labels[0:len(self.table_labels) - 1]):
+        for col, header in enumerate(self.table_labels[0:len(self.table_labels) - 2]):
             item = self.table.item(row, col)
             if self.label_configs is not None:
                 info[self.label_configs[header]] = item.text()
@@ -744,7 +750,12 @@ class TableWidget(QWidget):
                 info[item.column()] = item.text()
 
         # Appel de la fonction d'analyse avec les informations du cheval
-        self.parent.action_button_clicked(info)
+        if flag == 1:
+            self.parent.action_button_clicked(info)
+        elif flag == 2:
+            self.parent._open_result_tab(info)
+        else:
+            return
         
     def set_column_width(self, width):
         for col in range(self.table.columnCount()):

@@ -282,7 +282,7 @@ class MainWindow(QMainWindow):
         self.layout_buttons.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         
         self.run_horse_app_button = components._create_button_widget("Commencer maintenant", height=25)
-        self.run_horse_app_button.clicked.connect(self._goto_horse_analize_page)
+        self.run_horse_app_button.clicked.connect(self._goto_horse_app_page)
         
         self.run_modelzoo_button = components._create_button_widget("ModelZoo", height=25)
         self.run_modelzoo_button.clicked.connect(self._goto_superanimal)
@@ -435,9 +435,9 @@ class MainWindow(QMainWindow):
         )
         self.tab_widget.addTab(self.modelzoo, "Model Zoo")
         self.setCentralWidget(self.tab_widget)
-        self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
+        self.tab_widget.tabCloseRequested.connect(self._close_tab_event)
         
-    def _goto_horse_analize_page(self):
+    def _goto_horse_app_page(self):
         self.tab_widget = QtWidgets.QTabWidget()
         self.tab_widget.setTabsClosable(True)
         self.tab_widget.setContentsMargins(0, 20, 0, 0)
@@ -446,14 +446,25 @@ class MainWindow(QMainWindow):
         )
         self.tab_widget.addTab(self.horse_app, "Commencer l'analyse")
         self.setCentralWidget(self.tab_widget)
-        self.tab_widget.tabCloseRequested.connect(lambda index: self._close_tab_event(index))
+        self.tab_widget.tabCloseRequested.connect(self._close_tab_event)
+        
+    def _open_result_tab(self, horse_infos):
+        self.horse_app2 = HorseApp(
+            root=self, parent=None, h1_description="DeepLabCut - Analyse des chevaux"
+        )
+        self.tab_widget.addTab(self.horse_app2, f"Résultat d'analyse: { horse_infos['horse_name'] }")
+        self.tab_widget.tabCloseRequested.connect(self._close_tab_event)
     
     def _close_tab_event(self, index):
         widget = self.tab_widget.widget(index)
+        if widget is not None:
+            widget.deleteLater()
+
         self.tab_widget.removeTab(index)
-        widget.deleteLater()
+
         if self.tab_widget.count() == 0:
-            self.tab_widget.deleteLater()
+            if self.tab_widget is not None:
+                self.tab_widget.deleteLater()
             self._generate_welcome_page()
 
     def load_config(self, config):

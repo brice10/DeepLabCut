@@ -150,3 +150,5 @@ class HorseApp(DefaultTab):
         print(f"Analyse du cheval: { row['horse_name'] }")
         self.run_video_adaptation(row['video_path'], row['video_type'], dest_folder=row['project_path'])
     
+    def _open_result_tab(self, horse_info):
+        self.root._open_result_tab(horse_info)
